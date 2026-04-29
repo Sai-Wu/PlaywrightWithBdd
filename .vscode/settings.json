@@ -1,9 +1,25 @@
 {
     "cucumber.features": [
+        "src/features/**/*.feature",
+        "src/test/**/*.feature",
         "features/**/*.feature",
         "tests/**/*.feature",
+        "*specs*/**/*.feature"
     ],
     "cucumber.glue": [
-        "step-definitions/*.steps.ts"
+        "src/typescript/step-definitions/**/*.steps.ts",
+        "*specs*/**/*.cs",
+        "features/**/*.js",
+        "features/**/*.jsx",
+        "features/**/*.php",
+        "features/**/*.py",
+        "features/**/*.rs",
+        "features/**/*.rb",
+        "features/**/*.ts",
+        "features/**/*.tsx",
+        "features/**/*_test.go",
+        "src/test/**/*.java",
+        "tests/**/*.py",
+        "tests/**/*.rs"
     ]
 }

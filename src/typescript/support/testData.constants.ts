@@ -3,24 +3,15 @@
  * Used in tests for hardcoded values that don't change frequently.
  */
 
-export const TEST_USERS = {
-    shared: {
-        role: 'shared' as const,
-        username: 'shared.test.account@amazon.com',
-    },
-    parallel: {
-        role: 'parallel' as const,
-        username: 'parallel.test.account@amazon.com',
-    },
-} as const;
-
-export const TIMEOUTS = {
-    pageLoad: 30000,
-    element: 10000,
-    login: 15000,
-    networkError: 5000,
-    lockWait: 120000,  // 2 minutes: Allow queued workers enough time to acquire lock
-} as const;
+import path from "node:path";
+export const testAccount = {
+    email : process.env.USERNAME,
+    password : process.env.PASSWORD,
+};
+export const TESTDATA_LOCATION = path.join(__dirname, '../../resources/testdata/');
+export const TESTDATA_FILES = {
+    mockResponses: 'response/mock-response.json',
+};
 
 export const ERROR_CODES = {
     notFound: 404,
@@ -42,18 +33,6 @@ export const SEARCH_TERMS = {
     electronics: 'laptop',
     books: 'playwright testing',
     home: 'coffee maker',
-} as const;
-
-export const LOCK_CONFIG = {
-    timeout: 60000, // 60 seconds max wait for lock
-    pollInterval: 100, // Check every 100ms if lock is available
-    maxRetries: 5,
-} as const;
-
-export const SESSION_CONFIG = {
-    sessionDir: '.sessions',
-    lockDir: '.locks',
-    sessionTimeout: 24 * 60 * 60 * 1000, // 24 hours
 } as const;
 
 export const MOCK_SCENARIOS = {

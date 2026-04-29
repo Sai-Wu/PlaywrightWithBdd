@@ -1,1 +1,8 @@
 node_modules
+.env
+.locks/
+.sessions/
+dist/
+cucumber-report/
+test-results/
+.DS_Store

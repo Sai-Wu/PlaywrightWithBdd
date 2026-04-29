@@ -1,12 +1,13 @@
 import { Locator, Page } from "@playwright/test";
+import { Header } from "../common/header";
 export class SearchPage{
     readonly page : Page;
-    readonly homeLink : Locator;
+    readonly header: Header;
     readonly productRow: Locator;
     readonly productCard: Locator;
     constructor(page: Page) {
         this.page = page;
-        this.homeLink = this.page.getByRole('link', { name: 'Amazon', exact: true });
+        this.header = new Header(this.page);
         this.productRow = this.page.locator('div.puisg-row');
         this.productCard = this.page.locator('div.puis-card-container');
     }
@@ -15,6 +16,9 @@ export class SearchPage{
     }
     get listOfProductRows(){
         return this.productRow;
+    }
+    async clickHomeLink() {
+        await this.header.clickHomeLink();
     }
 }
 

@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { BrowserContext } from '@playwright/test';
-import { SESSION_CONFIG } from './testData.constants';
+import { SESSION_CONFIG } from './config';
 
 export interface StoredSession {
-    accountRole: 'shared' | 'parallel';
+    accountRole: 'shared' | 'parallel' | 'envAccount';
     cookies: any[];
     localStorage?: Record<string, string>;
     sessionStorage?: Record<string, string>;
@@ -48,12 +48,13 @@ export class SessionManager {
     /**
      * Get path to session file for a given account role.
      */
-    private getSessionPath(accountRole: 'shared' | 'parallel'): string {
+    private getSessionPath(accountRole: 'shared' | 'parallel' | 'envAccount'): string {
         return path.join(this.sessionsDir, `${accountRole}-session.json`);
     }
 
     /**
      * Check if session file exists and is not expired.
+     * Also validates that cookies haven't expired based on their expires property.
      */
     private isSessionValid(sessionPath: string): boolean {
         if (!fs.existsSync(sessionPath)) {
@@ -62,8 +63,37 @@ export class SessionManager {
 
         try {
             const data = JSON.parse(fs.readFileSync(sessionPath, 'utf-8')) as StoredSession;
+            
+            // Check session age
             const sessionAge = Date.now() - data.timestamp;
-            return sessionAge < this.sessionTimeout;
+            if (sessionAge >= this.sessionTimeout) {
+                console.log('[SessionManager] Session expired: too old');
+                return false;
+            }
+
+            // Check if any cookies have expired
+            if (data.cookies && data.cookies.length > 0) {
+                const now = Date.now();
+                const hasValidCookies = data.cookies.some(cookie => {
+                    // If no expires property, treat as session cookie (valid)
+                    if (!cookie.expires) {
+                        return true;
+                    }
+                    // expires is typically in seconds for Playwright cookies
+                    // Convert to milliseconds if necessary
+                    const expiresMs = typeof cookie.expires === 'number' && cookie.expires < 10000000000 
+                        ? cookie.expires * 1000 
+                        : cookie.expires;
+                    return expiresMs > now;
+                });
+
+                if (!hasValidCookies) {
+                    console.log('[SessionManager] Session expired: all cookies have expired');
+                    return false;
+                }
+            }
+
+            return true;
         } catch (error) {
             return false;
         }
@@ -73,7 +103,7 @@ export class SessionManager {
      * Save session (cookies, localStorage, sessionStorage) to disk.
      */
     public async saveSession(
-        accountRole: 'shared' | 'parallel',
+        accountRole: 'shared' | 'parallel' | 'envAccount',
         cookies: any[],
         localStorage?: Record<string, string>,
         sessionStorage?: Record<string, string>
@@ -100,7 +130,7 @@ export class SessionManager {
      * Load session from disk.
      * Returns null if session doesn't exist or is expired.
      */
-    public async loadSession(accountRole: 'shared' | 'parallel'): Promise<StoredSession | null> {
+    public async loadSession(accountRole: 'shared' | 'parallel' | 'envAccount'): Promise<StoredSession | null> {
         const sessionPath = this.getSessionPath(accountRole);
 
         if (!this.isSessionValid(sessionPath)) {
@@ -128,7 +158,7 @@ export class SessionManager {
      */
     public async applySession(
         context: BrowserContext,
-        accountRole: 'shared' | 'parallel'
+        accountRole: 'shared' | 'parallel' | 'envAccount'
     ): Promise<boolean> {
         const session = await this.loadSession(accountRole);
         if (!session) {
@@ -160,7 +190,7 @@ export class SessionManager {
     /**
      * Clear (delete) stored session.
      */
-    public clearSession(accountRole: 'shared' | 'parallel'): void {
+    public clearSession(accountRole: 'shared' | 'parallel' | 'envAccount'): void {
         const sessionPath = this.getSessionPath(accountRole);
         try {
             if (fs.existsSync(sessionPath)) {
@@ -192,7 +222,7 @@ export class SessionManager {
     /**
      * Get session info without loading the full session (for debugging).
      */
-    public getSessionInfo(accountRole: 'shared' | 'parallel'): { exists: boolean; age: number; valid: boolean } {
+    public getSessionInfo(accountRole: 'shared' | 'parallel' | 'envAccount'): { exists: boolean; age: number; valid: boolean } {
         const sessionPath = this.getSessionPath(accountRole);
         const exists = fs.existsSync(sessionPath);
 
