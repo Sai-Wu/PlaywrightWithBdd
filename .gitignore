@@ -6,3 +6,5 @@ dist/
 cucumber-report/
 test-results/
 .DS_Store
+.features-gen/
+playwright-repport/

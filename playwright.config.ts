@@ -1,13 +1,26 @@
 import { defineConfig, devices } from '@playwright/test';
-import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
+import { defineBddProject } from 'playwright-bdd';
+// import { defineBddConfig, defineBddProject } from 'playwright-bdd';
+import { test } from './src/typescript/support/fixture';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const testDir = defineBddConfig({
+// const testDir = defineBddConfig({
+//   features: 'src/features/*.feature',
+//   steps: ['src/typescript/step-definitions/*.ts', 'src/typescript/support/fixture.ts'],
+//   aiFix:{
+//     promptAttachment:true
+//   }
+// });
+const project = defineBddProject({
+  name: 'chromium',
   features: 'src/features/*.feature',
-  steps: 'src/typescript/step-definitions/*.ts',
+  steps: ['src/typescript/step-definitions/*.ts', 'src/typescript/support/fixture.ts'],
+  aiFix: {
+    promptAttachment: true
+  },
+  featuresRoot: 'src/features',
 });
-
 /**
  * Worker Strategy for Mixed Account Testing
  * 
@@ -37,18 +50,13 @@ const testDir = defineBddConfig({
  */
 
 export default defineConfig({
-  testDir,
-  
+  testDir: project.testDir,
   // Worker configuration: set based on your test mix
   // Default to 1 worker to avoid lock contention on shared account
   // Override with --workers flag or WORKERS env var
   workers: process.env.WORKERS ? parseInt(process.env.WORKERS) : 1,
 
   reporter: [
-    cucumberReporter('html', {
-      outputFile: 'cucumber-report/index.html',
-      externalAttachments: true,
-    }),
     ['html', { open: 'never' }],
   ],
 
@@ -64,7 +72,8 @@ export default defineConfig({
 
   projects: [
     {
-      name: 'chromium',
+      name: project.name,
+      testDir: project.testDir,
       use: { ...devices['Desktop Chrome'] },
     },
   ],

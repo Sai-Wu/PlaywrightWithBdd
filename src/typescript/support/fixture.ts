@@ -1,4 +1,4 @@
-import {test as base, expect, Page, BrowserContext, TestInfo } from '@playwright/test';
+import { expect, Page, BrowserContext, TestInfo } from '@playwright/test';
 import { test as bddBase, createBdd } from 'playwright-bdd';
 import AxeBuilder from '@axe-core/playwright';
 import { CreateReport } from 'axe-html-reporter';
@@ -24,13 +24,6 @@ export interface TestDataContext {
     header: Pages.Header;
     mockResponses: RouteInterceptor;
 }
-const bdd = createBdd(bddBase) as any;
-export const { Given, When, Then} = bdd; 
-export const bddTest = bddBase.extend<{testDataContext : TestDataContext}>({
-    testDataContext: async ({page}, use, testInfo) => {
-        await buildTestDataContext({page, testInfo}, use);
-    }
-})
 async function buildTestDataContext( 
     {page, testInfo} : {page: Page; testInfo: TestInfo},
     use: (v : TestDataContext) => Promise<void> ): Promise<void> {
@@ -132,7 +125,13 @@ async function buildTestDataContext(
 }
 
 // Export managers for use in step definitions and tests
-export { testDataManager, TestDataManager } from './testDataLoader';
+export { testDataManager } from './testDataLoader';
 export { workerLockManager, WorkerLockManager } from './workerLocks';
 export { sessionManager, SessionManager } from './sessionManager';
 export { RouteInterceptor } from './routeInterceptor';
+export const test = bddBase.extend<{testDataContext : TestDataContext}>({
+    testDataContext: async ({page}, use, testInfo) => {
+        await buildTestDataContext({page, testInfo}, use);
+    }
+});
+export const { Given, When, Then} = createBdd(test);
