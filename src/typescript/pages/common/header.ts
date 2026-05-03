@@ -15,8 +15,8 @@ export class Header{
     async clickHomeLink() {
         await this.homeLink.click();
     }
-    async clickAccountList() {
-        await this.accountList.click();
+    get getAccountList() {
+        return this.accountList;
     }
     async enterSearchTerm(term: string) {
         await this.searchBar.fill(term);

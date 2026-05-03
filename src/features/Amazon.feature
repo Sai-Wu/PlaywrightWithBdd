@@ -1,11 +1,13 @@
 @Amazon
 Feature: Testing Amazon UI
     Scenario Outline: Testing the login functionality
-        Given I am on the homepage
+        Given I navigate to the homepage
         When I navigate to the login page from the homepage
         Then I should see the login page
         When I login with credentials
+        Then I should be logged in successfully
+        When I search for "<searchTerm>"
+        Then I should see search results
         Examples: 
-            | username  | password  |
-            | user1     | pass1     |
-            | user2     | pass2     |
+            | searchTerm  |
+            | laptop      |

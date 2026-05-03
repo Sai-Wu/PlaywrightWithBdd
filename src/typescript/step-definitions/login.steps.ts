@@ -20,3 +20,8 @@ When('I login with credentials', async ({ testDataContext, context, page }: { te
     const cookies = await context.cookies();
     await sessionManager.saveSession('envAccount', cookies);
 });
+Then('I should be logged in successfully', async({page, testDataContext}: {page: Page; testDataContext: TestDataContext}) => {
+    await expect(page.url()).toContain(URLS.baseUrl);
+    await expect(testDataContext.header.accountList).toBeVisible();
+    await expect(testDataContext.header.accountList).toHaveText(/Hello, [\w\s]+/);
+})
