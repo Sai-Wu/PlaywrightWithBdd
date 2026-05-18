@@ -4,7 +4,6 @@ import { testDataManager } from './testDataLoader';
  * Base URL configuration - integrates with TestDataManager
  * Allows override via TEST_BASE_URL environment variable
  */
-export const baseUrl = process.env.TEST_BASE_URL || 'https://www.amazon.com/';
 export const LOCK_CONFIG = {
     timeout: 60000, // 60 seconds max wait for lock
     pollInterval: 100, // Check every 100ms if lock is available

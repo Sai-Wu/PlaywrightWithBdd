@@ -55,6 +55,7 @@ export class SessionManager {
     /**
      * Check if session file exists and is not expired.
      * Also validates that cookies haven't expired based on their expires property.
+     * Automatically deletes expired session files to keep storage clean.
      */
     private isSessionValid(sessionPath: string): boolean {
         if (!fs.existsSync(sessionPath)) {
@@ -67,7 +68,8 @@ export class SessionManager {
             // Check session age
             const sessionAge = Date.now() - data.timestamp;
             if (sessionAge >= this.sessionTimeout) {
-                console.log('[SessionManager] Session expired: too old');
+                console.log('[SessionManager] Session expired: too old, deleting...');
+                fs.unlinkSync(sessionPath);
                 return false;
             }
 
@@ -88,7 +90,8 @@ export class SessionManager {
                 });
 
                 if (!hasValidCookies) {
-                    console.log('[SessionManager] Session expired: all cookies have expired');
+                    console.log('[SessionManager] Session expired: all cookies have expired, deleting...');
+                    fs.unlinkSync(sessionPath);
                     return false;
                 }
             }
@@ -132,7 +135,7 @@ export class SessionManager {
      */
     public async loadSession(accountRole: 'shared' | 'parallel' | 'envAccount'): Promise<StoredSession | null> {
         const sessionPath = this.getSessionPath(accountRole);
-
+        console.log(`Attempting to load session for account role "${accountRole}" from ${sessionPath}`);
         if (!this.isSessionValid(sessionPath)) {
             console.log(
                 `Session not found or expired for account role "${accountRole}" at ${sessionPath}`

@@ -66,7 +66,7 @@ export default defineConfig({
     
     // Artifacts for debugging
     screenshot: 'only-on-failure',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     video: 'retain-on-failure',
   },
 

@@ -21,6 +21,8 @@ export interface TestDataContext {
     searchPage: Pages.SearchPage;
     eventPage: Pages.EventPage;
     loginPage: Pages.LoginPage;
+    cartPage: Pages.CartPage;
+    productPage: Pages.ProductPage;
     header: Pages.Header;
     mockResponses: RouteInterceptor;
 }
@@ -32,6 +34,8 @@ async function buildTestDataContext(
     let _eventPage: Pages.EventPage | null = null;
     let _header: Pages.Header | null = null;
     let _loginPage: Pages.LoginPage | null = null;
+    let _cartPage: Pages.CartPage | null = null;
+    let _productPage: Pages.ProductPage | null = null;
     let _mockResponses: RouteInterceptor | null = null;
     let _lockAcquired = false;
     let _lockedAccountId: string | null = null;
@@ -102,6 +106,18 @@ async function buildTestDataContext(
                 _loginPage = new Pages.LoginPage(page);
             }
             return _loginPage;
+        },
+        get cartPage() {
+            if (!_cartPage) {
+                _cartPage = new Pages.CartPage(page);
+            }
+            return _cartPage;
+        },
+        get productPage() {
+            if (!_productPage) {
+                _productPage = new Pages.ProductPage(page);
+            }
+            return _productPage;
         }
     }
     

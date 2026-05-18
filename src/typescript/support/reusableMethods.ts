@@ -2,7 +2,7 @@ import { Locator, Page } from '@playwright/test';
 export class ReusableMethods {
     static async waitForPageLoad(page: Page, timeout: number = 10000) {
         await page.waitForEvent('load', { timeout });
-        await page.waitForEvent('domcontentloaded', { timeout });
+       //await page.waitForEvent('domcontentloaded', { timeout });
         await this.waitForServiceWorkerReady(page, timeout);
         console.log('[ReusableMethods] Page load complete');
     }

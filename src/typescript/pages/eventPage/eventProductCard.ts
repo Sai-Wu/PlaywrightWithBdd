@@ -20,3 +20,4 @@ export class SearchProductCard{
         return this.productPrice.locator('span.a-price',{hasText:'List'});
     }
 }
+//TODO this is a product card in horizontal layout. Need to figure out a common class for vertical and horizontal? 

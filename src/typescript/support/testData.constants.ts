@@ -3,11 +3,15 @@
  * Used in tests for hardcoded values that don't change frequently.
  */
 
+import dotenv from 'dotenv';
+dotenv.config({ override: true });
 import path from "node:path";
 export const testAccount = {
     email : process.env.USERNAME,
     password : process.env.PASSWORD,
 };
+console.log(`[TestData] Loaded test account email: ${testAccount.email ? '***' + testAccount.email.slice(-4) : 'Not Set'}`);
+console.log(`[TestData] Loaded test account password: ${testAccount.password ? '***' + testAccount.password.slice(-4) : 'Not Set'}`);
 export const TESTDATA_LOCATION = path.join(__dirname, '../../resources/testdata/');
 export const TESTDATA_FILES = {
     mockResponses: 'response/mock-response.json',
@@ -23,7 +27,7 @@ export const ERROR_CODES = {
 } as const;
 
 export const URLS = {
-    baseUrl: 'https://www.amazon.com/',
+    baseUrl: process.env.TEST_BASE_URL || 'https://www.amazon.com/',
     loginPage: 'https://www.amazon.com/ap/signin',
     homepage: 'https://www.amazon.com/',
     searchPage: 'https://www.amazon.com/s',
