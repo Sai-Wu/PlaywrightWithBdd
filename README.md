@@ -6,7 +6,7 @@ A comprehensive Playwright test automation framework for Amazon.com using BDD (B
 
 ### 🏗️ Architecture
 - **Page Object Model (POM)**: Clean separation of selectors and test logic
-  - HomePage, SearchPage, EventPage, Header
+  - HomePage, SearchPage, EventPage, CartPage, ProductPage, Header
   - Lazy-loaded getters in fixture for efficient resource management
   
 - **Playwright-BDD Integration**: Write tests in Gherkin syntax
@@ -88,48 +88,54 @@ Mock API responses using Playwright's route interception:
 
 #### Environment Variables (`.env`)
 - Sensitive data: passwords, usernames (git-ignored)
-- Override config file values with `TEST_BASE_URL`, `SHARED_ACCOUNT_PASSWORD`, etc.
-
-#### Config File (`testData.config.json`)
-- Non-sensitive defaults: account roles, URLs, test constants
-- Committed to repo for reference
-- Merged with environment variables at runtime
+- Override with `USERNAME`, `PASSWORD`, `TEST_BASE_URL`, etc.
 
 #### Constants (`testData.constants.ts`)
 - TypeScript exports for frequently-used values
 - Timeouts, error codes, search terms, lock config
+
+#### Test Data Resources (`src/resources/testdata/`)
+- Mock response fixtures (JSON files)
+- Test data files used for loading into tests
 
 ## Project Structure
 
 ```
 src/
 ├── features/
-│   ├── Amazon.feature              # Original feature file
+│   ├── Amazon.feature              # Refactored feature file with enhanced scenarios
 │   └── auth-and-errors.feature     # Example scenarios (locks, sessions, mocks)
 ├── resources/
-│   └── data/                       # Test data files (optional)
+│   └── testdata/
+│       └── response/               # Mock response fixtures (JSON files)
 ├── typescript/
 │   ├── pages/                      # Page Object Models
 │   │   ├── home.page.ts
+│   │   ├── cart.page.ts
+│   │   ├── product.page.ts         # ✨ New: Product details page object
+│   │   ├── login.page.ts           # Enhanced: Improved login flow
 │   │   ├── searchPage/search.page.ts
 │   │   ├── eventPage/event.page.ts
+│   │   ├── eventPage/eventProductCard.ts
 │   │   ├── common/header.ts
 │   │   └── index.ts                # Barrel exports
 │   ├── step-definitions/           # Step implementations
 │   │   ├── auth.steps.ts           # Login, session persistence
 │   │   ├── mocking.steps.ts        # API error mocking
 │   │   ├── navigation.steps.ts     # Navigation using POMs
-│   │   └── homepage.steps.ts       # Original steps
+│   │   ├── homepage.steps.ts       # Original steps
+│   │   ├── searchpage.steps.ts     # Search page steps
+│   │   ├── eventpage.steps.ts      # Event page steps
+│   │   └── login.steps.ts          # Login steps
 │   └── support/                    # Infrastructure & configuration
 │       ├── fixture.ts              # Test context with managers
-│       ├── config.ts               # Base URL configuration
-│       ├── constants.ts            # Original constants
-│       ├── testDataManager.ts      # Load credentials & test data
-│       ├── testData.config.json    # Non-sensitive test data
+│       ├── config.ts               # Base URL and configuration
 │       ├── testData.constants.ts   # TypeScript constants
+│       ├── testDataLoader.ts       # Load test data from resources
 │       ├── workerLocks.ts          # File-based lock management
 │       ├── sessionManager.ts       # Session persistence
-│       └── routeInterceptor.ts     # API response mocking
+│       ├── routeInterceptor.ts     # API response mocking
+│       └── reusableMethods.ts      # Shared test utilities
 .locks/                            # (git-ignored) Worker lock files
 .sessions/                         # (git-ignored) Saved sessions
 .env                               # (git-ignored) Environment variables
@@ -154,12 +160,12 @@ cp .env.example .env
 # Edit .env with your test credentials
 ```
 
-### 3. Update Test Data Config (Optional)
+### 3. Configure Test Data (Optional)
 
-Edit `src/typescript/support/testData.config.json` to customize:
-- Account roles and usernames
-- API URLs and endpoints
-- Test constants (timeouts, search terms)
+Edit environment variables in `.env` to customize:
+- Account credentials (USERNAME, PASSWORD)
+- Test URLs and endpoints
+- Custom timeouts
 
 ## Running Tests
 
@@ -476,6 +482,7 @@ const { testDataContext } = await use();
 testDataContext.homePage      // HomePage POM
 testDataContext.searchPage    // SearchPage POM
 testDataContext.eventPage     // EventPage POM
+testDataContext.productPage   // ProductPage POM ✨ NEW
 testDataContext.header        // Header component
 ```
 
@@ -806,7 +813,7 @@ When adding new tests:
 3. ✅ Add appropriate `@tag` annotations for test categorization
 4. ✅ Use POMs via `testDataContext` (lazy-loaded)
 5. ✅ Mock external APIs instead of calling real endpoints
-6. ✅ Store test data in `testData.config.json`, not in code
+6. ✅ Store test data in environment variables or fixture files under `src/resources/testdata/`
 
 ## Reporting
 
@@ -976,6 +983,54 @@ workers: process.env.WORKERS ? parseInt(process.env.WORKERS) : 1,
 WORKERS=4 npm test -- --grep "@parallel-account"
 npm test -- --workers=4
 ```
+
+## Changelog
+
+### Latest Update (May 17, 2026)
+
+**feat: Refactor Amazon feature scenarios, enhance login flow, and add product page functionality**
+
+#### Added
+- ✨ **New `ProductPage` POM** (`src/typescript/pages/product.page.ts`)
+  - Complete page object model for product details page
+  - Methods for product interactions and validation
+  - Fully integrated with test fixture
+
+#### Enhanced
+- 🔐 **Login Flow Improvements** (`login.page.ts`, `login.steps.ts`)
+  - Better error handling during authentication
+  - Improved session validation
+  - More robust element locators
+  
+- 📄 **Amazon Feature Refactor** (`src/features/Amazon.feature`)
+  - Streamlined and clarified test scenarios
+  - Better test coverage organization
+  - Improved naming and structure
+
+- 🛠️ **Configuration Updates**
+  - Updated `playwright.config.ts` with optimized settings
+  - Enhanced `fixture.ts` with better resource management
+  - Improved `sessionManager.ts` for session handling
+  - Updated constants in `testData.constants.ts`
+
+- 🎯 **Page Objects & Steps**
+  - Enhanced `home.page.ts` selectors and methods
+  - Improved `searchPage/search.page.ts` functionality
+  - Updated `eventPage/eventProductCard.ts` interactions
+  - Refined step definitions for homepage, login, and search
+
+#### Statistics
+- **Files Modified**: 16
+- **Files Added**: 1
+- **Insertions**: 217
+- **Deletions**: 40
+
+#### Migration Guide
+If upgrading from previous version:
+1. No breaking changes to existing tests
+2. New `ProductPage` can be used via `testDataContext.productPage`
+3. Login flow improvements are backward compatible
+4. Consider refactoring tests to use new ProductPage features
 
 ## License
 
